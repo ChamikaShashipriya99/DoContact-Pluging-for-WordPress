@@ -1,0 +1,24 @@
+/* Admin list simple styles */
+.wrap .widefat td, 
+.wrap .widefat th { 
+    vertical-align: middle; 
+}
+
+.wrap 
+.tablenav-pages { 
+    margin-top: 10px; 
+}
+
+.page-numbers { 
+    display:inline-block; 
+    padding:6px 9px; 
+    margin-right:6px; 
+    background:#f1f1f1; 
+    text-decoration:none; 
+    border-radius:4px; 
+}
+
+.page-numbers.current { 
+    font-weight:700; 
+    background:#fff; 
+}

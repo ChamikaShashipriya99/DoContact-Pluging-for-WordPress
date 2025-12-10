@@ -1,0 +1,123 @@
+/**
+ * DoContact Form Styles
+ *
+ * @package DoContact
+ * @version 1.0.0
+ */
+
+/* ==========================================================================
+   Form Container
+   ========================================================================== */
+
+.docontact-wrap {
+	max-width: 640px;
+	margin: 0 auto;
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ==========================================================================
+   Form Fields
+   ========================================================================== */
+
+.docontact-wrap input[type="text"],
+.docontact-wrap input[type="email"],
+.docontact-wrap input[type="tel"],
+.docontact-wrap select,
+.docontact-wrap textarea {
+	width: 100%;
+	padding: 10px;
+	box-sizing: border-box;
+	margin-top: 6px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	transition: border-color 0.3s ease;
+}
+
+.docontact-wrap input.doc-field-invalid,
+.docontact-wrap textarea.doc-field-invalid {
+	border-color: #a94442;
+}
+
+.docontact-wrap label {
+	font-weight: 600;
+}
+
+/* ==========================================================================
+   Submit Button
+   ========================================================================== */
+
+.doc-button {
+	width: 100%;
+	padding: 10px 16px;
+	cursor: pointer;
+	border: 0;
+	background: #a94442;
+	color: #fff;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Loading Spinner
+   ========================================================================== */
+
+.doc-loading {
+	vertical-align: middle;
+	margin-left: 8px;
+}
+
+.doc-spinner {
+	width: 18px;
+	height: 18px;
+	display: inline-block;
+	border: 3px solid rgba(0, 0, 0, 0.12);
+	border-top-color: rgba(0, 0, 0, 0.45);
+	border-radius: 50%;
+	animation: doc-spin 1s linear infinite;
+}
+
+@keyframes doc-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* ==========================================================================
+   Form Messages
+   ========================================================================== */
+
+#docontact-messages {
+	margin-bottom: 12px;
+}
+
+.doc-success {
+	color: #155724;
+	background: #d4edda;
+	padding: 10px;
+	border-radius: 4px;
+	border: 1px solid #c3e6cb;
+}
+
+.doc-error {
+	color: #721c24;
+	background: #f8d7da;
+	padding: 10px;
+	border-radius: 4px;
+	border: 1px solid #f5c6cb;
+}
+
+/* ==========================================================================
+   Field Error Messages
+   ========================================================================== */
+
+.doc-field-error {
+	display: block;
+	color: #a94442;
+	font-size: 12px;
+	margin-top: 4px;
+	line-height: 1.4;
+	min-height: 16px;
+}
