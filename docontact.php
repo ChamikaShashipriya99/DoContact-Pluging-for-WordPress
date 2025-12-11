@@ -94,6 +94,11 @@ class DoContact_Plugin_Bootstrap {
     }
 
     public function register_frontend_assets() {
+        // Font Awesome (if not already enqueued by theme)
+        if ( ! wp_style_is( 'font-awesome', 'enqueued' ) && ! wp_style_is( 'fontawesome', 'enqueued' ) ) {
+            wp_register_style( 'font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0' );
+        }
+        
         // CSS
         wp_register_style( 'docontact-form', DOCONTACT_URL . 'assets/css/form.css', array(), DOCONTACT_VERSION );
         // JS (depends on jquery)

@@ -35,6 +35,9 @@ class DoContact_Shortcode {
      */
     public function render( $atts = array() ) {
         // Enqueue assets
+        if ( wp_style_is( 'font-awesome', 'registered' ) ) {
+            wp_enqueue_style( 'font-awesome' );
+        }
         wp_enqueue_style( 'docontact-form' );
         wp_enqueue_script( 'docontact-form' );
 
@@ -64,11 +67,14 @@ class DoContact_Shortcode {
 
                 <p>
                     <label for="doc_service">Service Required</label><br/>
-                    <select id="doc_service" name="service">
-                        <?php foreach ( $this->service_options as $key => $label ): ?>
-                            <option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <div class="doc-select-wrapper">
+                        <select id="doc_service" name="service">
+                            <?php foreach ( $this->service_options as $key => $label ): ?>
+                                <option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <i class="fas fa-angle-down"></i>
+                    </div>
                 </p>
 
                 <p>
