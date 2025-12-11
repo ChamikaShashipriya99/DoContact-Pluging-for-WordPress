@@ -32,10 +32,21 @@
 	margin-top: 6px;
 	border: 1px solid #ddd;
 	border-radius: 4px;
-	transition: border-color 0.3s ease;
+	transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.docontact-wrap input[type="text"]:focus,
+.docontact-wrap input[type="email"]:focus,
+.docontact-wrap input[type="tel"]:focus,
+.docontact-wrap select:focus,
+.docontact-wrap textarea:focus {
+	outline: none;
+	border-color: #007cba;
+	box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.15);
 }
 
 .docontact-wrap input.doc-field-invalid,
+.docontact-wrap select.doc-field-invalid,
 .docontact-wrap textarea.doc-field-invalid {
 	border-color: #a94442;
 }
@@ -55,6 +66,7 @@
 }
 
 .doc-select-wrapper select {
+	padding-right: 40px;
 	-webkit-appearance: none;
 	-moz-appearance: none;
 	appearance: none;
@@ -89,6 +101,29 @@
 	color: #fff;
 	border-radius: 4px;
 	box-sizing: border-box;
+	transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+	font-weight: 600;
+}
+
+.doc-button:hover:not(:disabled) {
+	background: #8e3634;
+	box-shadow: 0 2px 4px rgba(169, 68, 66, 0.3);
+}
+
+.doc-button:active:not(:disabled) {
+	transform: translateY(1px);
+	box-shadow: 0 1px 2px rgba(169, 68, 66, 0.2);
+}
+
+.doc-button:focus {
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(169, 68, 66, 0.3);
+}
+
+.doc-button:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+	background: #a94442;
 }
 
 /* ==========================================================================
