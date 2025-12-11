@@ -93,16 +93,23 @@ class DoContact_Admin {
                                 <td><a href="mailto:<?php echo esc_attr( $row['email'] ); ?>"><?php echo esc_html( $row['email'] ); ?></a></td>
                                 <td><?php echo esc_html( $row['phone'] ); ?></td>
                                 <td><?php
-                                    $service_id = ! empty( $row['service'] ) ? absint( $row['service'] ) : 0;
-                                    if ( $service_id > 0 ) {
-                                        $service_post = get_post( $service_id );
-                                        $svc = $service_post && $service_post->post_type === 'services' ? $service_post->post_title : '';
+                                    $service_raw = isset( $row['service'] ) ? $row['service'] : '';
+                                    $svc = '';
+                                    if ( is_numeric( $service_raw ) ) {
+                                        $service_id = absint( $service_raw );
+                                        if ( $service_id > 0 ) {
+                                            $service_post = get_post( $service_id );
+                                            if ( $service_post && in_array( $service_post->post_type, array( 'services', 'service' ), true ) ) {
+                                                $svc = $service_post->post_title;
+                                            }
+                                        }
                                     } else {
-                                        $svc = '';
+                                        // Already stored as a readable title
+                                        $svc = $service_raw;
                                     }
                                     // Fallback to stored value if post not found
-                                    if ( empty( $svc ) && ! empty( $row['service'] ) ) {
-                                        $svc = $row['service'];
+                                    if ( empty( $svc ) && ! empty( $service_raw ) ) {
+                                        $svc = $service_raw;
                                     }
                                     echo esc_html( $svc );
                                 ?></td>

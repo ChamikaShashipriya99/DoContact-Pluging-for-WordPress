@@ -62,14 +62,17 @@ class DoContact_Ajax {
             wp_send_json_error( array( 'message' => implode( ' ', $errors ) ), 422 );
         }
 
-        // Validate service: must be a valid post ID from 'services' CPT
-        $service_id = '';
+        // Validate service: accept either 'services' or 'service' CPT IDs
+        $service_id      = '';
+        $service_value   = '';
+        $allowed_service = array( 'services', 'service' );
         if ( ! empty( $service ) ) {
             $service_id = absint( $service );
-            // Verify it's a valid published service post
             if ( $service_id > 0 ) {
                 $service_post = get_post( $service_id );
-                if ( ! $service_post || $service_post->post_type !== 'services' || $service_post->post_status !== 'publish' ) {
+                if ( $service_post && in_array( $service_post->post_type, $allowed_service, true ) && $service_post->post_status === 'publish' ) {
+                    $service_value = $service_post->post_title; // store the readable title instead of the ID
+                } else {
                     $service_id = '';
                 }
             } else {
@@ -84,7 +87,7 @@ class DoContact_Ajax {
             'full_name'  => $full_name,
             'email'      => $email,
             'phone'      => $phone,
-            'service'    => $service_id > 0 ? (string) $service_id : '',
+            'service'    => $service_value,
             'message'    => $message,
             'ip_address' => $ip_address,
             'created_at' => current_time( 'mysql', 1 ), // store as UTC
