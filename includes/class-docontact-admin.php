@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Admin page for viewing submissions.
  *
  * Responsibilities:
- * - Register the Tools → DoContact Submissions page.
+ * - Register the DoContact top-level menu page.
  * - Enqueue admin assets only when that page is loaded.
  * - Fetch paginated submissions from the DB wrapper.
  * - Render a table of submissions with basic pagination.
@@ -38,20 +38,22 @@ class DoContact_Admin {
     }
 
     public function register_menu() {
-        // Adds a submenu under Tools.
-        add_management_page(
+        // Adds a top-level menu item.
+        add_menu_page(
             __( 'DoContact Submissions', 'docontact' ),
-            __( 'DoContact Submissions', 'docontact' ),
+            __( 'DoContact', 'docontact' ),
             'manage_options',
             'docontact_submissions',
-            array( $this, 'render_page' )
+            array( $this, 'render_page' ),
+            'dashicons-email-alt',
+            26
         );
     }
 
     public function enqueue_assets( $hook ) {
         // Only enqueue on our page
         $screen = get_current_screen();
-        if ( $screen && isset( $screen->id ) && false !== strpos( $screen->id, 'tools_page_docontact_submissions' ) ) {
+        if ( $screen && isset( $screen->id ) && false !== strpos( $screen->id, 'docontact_submissions' ) ) {
             wp_enqueue_style( 'docontact-admin' );
             wp_enqueue_script( 'docontact-admin' );
         }
