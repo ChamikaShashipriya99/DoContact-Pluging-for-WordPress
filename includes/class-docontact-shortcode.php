@@ -17,13 +17,57 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class DoContact_Shortcode {
 
-    private $service_options = array(
-        'general'   => 'General Inquiry',
-        'web_dev'   => 'Web Development',
-        'seo'       => 'SEO',
-        'support'   => 'Support',
-        'other'     => 'Other',
-    );
+    /**
+     * Get service options from 'services' CPT
+     *
+     * @return array Array of post_id => post_title
+     */
+    private function get_service_options() {
+        // Try 'services' first, then 'service' (singular) as fallback
+        // TODO: If your CPT has a different name, add it here: array( 'services', 'service', 'your_cpt_name' )
+        $post_types_to_try = array( 'services', 'service' );
+        $options = array();
+        
+        foreach ( $post_types_to_try as $post_type ) {
+            // Check if post type exists
+            if ( ! post_type_exists( $post_type ) ) {
+                // Uncomment next line temporarily for debugging:
+                // error_log( "DoContact: Post type '{$post_type}' does not exist" );
+                continue;
+            }
+            
+            // Try using WP_Query for better compatibility
+            $query_args = array(
+                'post_type'      => $post_type,
+                'posts_per_page' => -1,
+                'post_status'    => 'publish',
+                'orderby'        => 'title',
+                'order'          => 'ASC',
+                'suppress_filters' => false,
+                'no_found_rows'  => true,
+            );
+            
+            $query = new WP_Query( $query_args );
+            
+            // Uncomment next line temporarily for debugging:
+            // error_log( "DoContact: Query for '{$post_type}' found {$query->found_posts} published posts" );
+            
+            if ( $query->have_posts() ) {
+                while ( $query->have_posts() ) {
+                    $query->the_post();
+                    $options[ get_the_ID() ] = get_the_title();
+                }
+                wp_reset_postdata();
+                break; // Found posts, no need to try other post types
+            }
+            wp_reset_postdata();
+        }
+        
+        // If no options found and you want to debug, uncomment the line below:
+        // error_log( 'DoContact: No services found. Checked post types: ' . implode( ', ', $post_types_to_try ) );
+        
+        return $options;
+    }
 
     public function __construct() {
         // Register shortcode tag.
@@ -69,8 +113,17 @@ class DoContact_Shortcode {
                     <label for="doc_service">Service Required</label><br/>
                     <div class="doc-select-wrapper">
                         <select id="doc_service" name="service">
-                            <?php foreach ( $this->service_options as $key => $label ): ?>
-                                <option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+                            <option value=""><?php esc_html_e( '-- Select Service --', 'docontact' ); ?></option>
+                            <?php
+                            $service_options = $this->get_service_options();
+                            if ( empty( $service_options ) ) {
+                                // Debug: Show message if no services found (remove in production)
+                                // Uncomment the line below temporarily to debug:
+                                // echo '<!-- DEBUG: No services found. Check if CPT "services" exists and has published posts. -->';
+                            }
+                            foreach ( $service_options as $post_id => $title ):
+                            ?>
+                                <option value="<?php echo esc_attr( $post_id ); ?>"><?php echo esc_html( $title ); ?></option>
                             <?php endforeach; ?>
                         </select>
                         <i class="fas fa-angle-down"></i>

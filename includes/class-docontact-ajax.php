@@ -24,14 +24,6 @@ class DoContact_Ajax {
     /** @var DoContact_Validator */
     private $validator;
 
-    private $service_options = array(
-        'general'   => 'General Inquiry',
-        'web_dev'   => 'Web Development',
-        'seo'       => 'SEO',
-        'support'   => 'Support',
-        'other'     => 'Other',
-    );
-
     public function __construct( DoContact_DB $db, DoContact_Validator $validator ) {
         $this->db = $db;
         $this->validator = $validator;
@@ -70,11 +62,19 @@ class DoContact_Ajax {
             wp_send_json_error( array( 'message' => implode( ' ', $errors ) ), 422 );
         }
 
-        // Normalize service value: keep key only if allowed
-        if ( ! empty( $service ) && array_key_exists( $service, $this->service_options ) ) {
-            $service_key = $service;
-        } else {
-            $service_key = '';
+        // Validate service: must be a valid post ID from 'services' CPT
+        $service_id = '';
+        if ( ! empty( $service ) ) {
+            $service_id = absint( $service );
+            // Verify it's a valid published service post
+            if ( $service_id > 0 ) {
+                $service_post = get_post( $service_id );
+                if ( ! $service_post || $service_post->post_type !== 'services' || $service_post->post_status !== 'publish' ) {
+                    $service_id = '';
+                }
+            } else {
+                $service_id = '';
+            }
         }
 
         $ip_address = $this->get_ip();
@@ -84,7 +84,7 @@ class DoContact_Ajax {
             'full_name'  => $full_name,
             'email'      => $email,
             'phone'      => $phone,
-            'service'    => $service_key,
+            'service'    => $service_id > 0 ? (string) $service_id : '',
             'message'    => $message,
             'ip_address' => $ip_address,
             'created_at' => current_time( 'mysql', 1 ), // store as UTC

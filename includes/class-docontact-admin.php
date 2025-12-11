@@ -21,14 +21,6 @@ class DoContact_Admin {
     /** @var DoContact_DB */
     private $db;
 
-    private $service_options = array(
-        'general'   => 'General Inquiry',
-        'web_dev'   => 'Web Development',
-        'seo'       => 'SEO',
-        'support'   => 'Support',
-        'other'     => 'Other',
-    );
-
     public function __construct( DoContact_DB $db ) {
         $this->db = $db;
 
@@ -101,7 +93,17 @@ class DoContact_Admin {
                                 <td><a href="mailto:<?php echo esc_attr( $row['email'] ); ?>"><?php echo esc_html( $row['email'] ); ?></a></td>
                                 <td><?php echo esc_html( $row['phone'] ); ?></td>
                                 <td><?php
-                                    $svc = isset( $this->service_options[ $row['service'] ] ) ? $this->service_options[ $row['service'] ] : $row['service'];
+                                    $service_id = ! empty( $row['service'] ) ? absint( $row['service'] ) : 0;
+                                    if ( $service_id > 0 ) {
+                                        $service_post = get_post( $service_id );
+                                        $svc = $service_post && $service_post->post_type === 'services' ? $service_post->post_title : '';
+                                    } else {
+                                        $svc = '';
+                                    }
+                                    // Fallback to stored value if post not found
+                                    if ( empty( $svc ) && ! empty( $row['service'] ) ) {
+                                        $svc = $row['service'];
+                                    }
                                     echo esc_html( $svc );
                                 ?></td>
                                 <td style="max-width:400px;"><div style="white-space:pre-wrap;"><?php echo esc_html( $row['message'] ); ?></div></td>
