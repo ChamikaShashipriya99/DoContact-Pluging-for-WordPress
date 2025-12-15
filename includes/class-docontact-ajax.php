@@ -31,6 +31,9 @@ class DoContact_Ajax {
         // Allow both logged-in and guest submissions.
         add_action( 'wp_ajax_docontact_submit', array( $this, 'handle' ) );
         add_action( 'wp_ajax_nopriv_docontact_submit', array( $this, 'handle' ) );
+
+        // Admin-only delete action.
+        add_action( 'wp_ajax_docontact_delete', array( $this, 'handle_delete' ) );
     }
 
     /**
@@ -100,6 +103,53 @@ class DoContact_Ajax {
         }
 
         wp_send_json_error( array( 'message' => __( 'Failed to save submission. Please try again later.', 'docontact' ) ), 500 );
+    }
+
+    /**
+     * Handle the AJAX delete request (admin only)
+     */
+    public function handle_delete() {
+        // Check admin capability.
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'docontact' ) ), 403 );
+        }
+
+        // Basic method guard.
+        if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+            wp_send_json_error( array( 'message' => __( 'Invalid request method.', 'docontact' ) ), 405 );
+        }
+
+        // Nonce verification.
+        $nonce = isset( $_POST['docontact_delete_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['docontact_delete_nonce'] ) ) : '';
+        
+        if ( empty( $nonce ) ) {
+            wp_send_json_error( array( 'message' => __( 'Security check failed: Nonce is missing.', 'docontact' ) ), 403 );
+        }
+        
+        $nonce_check = wp_verify_nonce( $nonce, 'docontact_delete_nonce' );
+        if ( ! $nonce_check ) {
+            // Log for debugging (remove in production)
+            error_log( 'DoContact Delete Nonce Verification Failed. Nonce received: ' . substr( $nonce, 0, 10 ) . '...' );
+            wp_send_json_error( array( 
+                'message' => __( 'Security check failed. Please refresh the page and try again.', 'docontact' ),
+                'debug' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'Nonce verification failed' : ''
+            ), 403 );
+        }
+
+        // Get and validate submission ID.
+        $id = isset( $_POST['submission_id'] ) ? absint( $_POST['submission_id'] ) : 0;
+        if ( $id <= 0 ) {
+            wp_send_json_error( array( 'message' => __( 'Invalid submission ID.', 'docontact' ) ), 400 );
+        }
+
+        // Delete the submission.
+        $deleted = $this->db->delete_submission( $id );
+
+        if ( $deleted ) {
+            wp_send_json_success( array( 'message' => __( 'Submission deleted successfully.', 'docontact' ) ) );
+        }
+
+        wp_send_json_error( array( 'message' => __( 'Failed to delete submission.', 'docontact' ) ), 500 );
     }
 
     /**

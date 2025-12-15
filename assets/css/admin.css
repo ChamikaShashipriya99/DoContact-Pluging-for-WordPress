@@ -22,3 +22,19 @@
     font-weight:700; 
     background:#fff; 
 }
+
+/* Delete button styling */
+.docontact-delete-btn {
+    cursor: pointer;
+}
+
+.docontact-delete-btn:hover {
+    background-color: #dc3232;
+    border-color: #dc3232;
+    color: #fff;
+}
+
+.docontact-delete-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

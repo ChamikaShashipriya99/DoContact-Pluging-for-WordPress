@@ -43,11 +43,39 @@ class DoContact_Admin {
     }
 
     public function enqueue_assets( $hook ) {
-        // Only enqueue on our page
+        // Only enqueue on our page - check both hook and screen ID
+        $is_our_page = false;
+        
+        // Check by hook parameter
+        if ( $hook === 'toplevel_page_docontact_submissions' ) {
+            $is_our_page = true;
+        }
+        
+        // Also check by screen ID for better compatibility
         $screen = get_current_screen();
         if ( $screen && isset( $screen->id ) && false !== strpos( $screen->id, 'docontact_submissions' ) ) {
+            $is_our_page = true;
+        }
+        
+        if ( $is_our_page ) {
+            // Ensure script is registered first (should already be, but double-check)
+            if ( ! wp_script_is( 'docontact-admin', 'registered' ) ) {
+                wp_register_script( 'docontact-admin', DOCONTACT_URL . 'assets/js/admin.js', array( 'jquery' ), DOCONTACT_VERSION, true );
+            }
+            
             wp_enqueue_style( 'docontact-admin' );
             wp_enqueue_script( 'docontact-admin' );
+            
+            // Create nonce for delete action - must be created when user is logged in
+            $nonce = wp_create_nonce( 'docontact_delete_nonce' );
+            
+            // Localize script with AJAX data and nonce
+            // wp_localize_script can be called before or after wp_enqueue_script
+            wp_localize_script( 'docontact-admin', 'DoContactAdmin', array(
+                'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'nonce'    => $nonce,
+                'confirm'  => __( 'Are you sure you want to delete this submission?', 'docontact' ),
+            ) );
         }
     }
 
@@ -66,7 +94,22 @@ class DoContact_Admin {
         $total = $this->db->count_submissions();
         $submissions = $this->db->get_submissions( $per_page, $offset );
         $total_pages = ( $total > 0 ) ? ceil( $total / $per_page ) : 1;
+        
+        // Output localized script data directly in the page to ensure it's available
+        // This is a fallback in case wp_localize_script doesn't work properly
+        $nonce = wp_create_nonce( 'docontact_delete_nonce' );
         ?>
+        <script type="text/javascript">
+        /* <![CDATA[ */
+        if (typeof DoContactAdmin === 'undefined') {
+            var DoContactAdmin = {
+                ajax_url: '<?php echo esc_js( admin_url( 'admin-ajax.php' ) ); ?>',
+                nonce: '<?php echo esc_js( $nonce ); ?>',
+                confirm: '<?php echo esc_js( __( 'Are you sure you want to delete this submission?', 'docontact' ) ); ?>'
+            };
+        }
+        /* ]]> */
+        </script>
         <div class="wrap">
             <h1><?php esc_html_e( 'DoContact Submissions', 'docontact' ); ?></h1>
             <p><?php printf( esc_html__( 'Total submissions: %d', 'docontact' ), intval( $total ) ); ?></p>
@@ -82,6 +125,7 @@ class DoContact_Admin {
                         <th><?php esc_html_e( 'Message', 'docontact' ); ?></th>
                         <th><?php esc_html_e( 'IP', 'docontact' ); ?></th>
                         <th><?php esc_html_e( 'Submitted (UTC)', 'docontact' ); ?></th>
+                        <th width="100"><?php esc_html_e( 'Actions', 'docontact' ); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,10 +160,15 @@ class DoContact_Admin {
                                 <td style="max-width:400px;"><div style="white-space:pre-wrap;"><?php echo esc_html( $row['message'] ); ?></div></td>
                                 <td><?php echo esc_html( $row['ip_address'] ); ?></td>
                                 <td><?php echo esc_html( $row['created_at'] ); ?></td>
+                                <td>
+                                    <button type="button" class="button button-small docontact-delete-btn" data-id="<?php echo esc_attr( $row['id'] ); ?>" data-name="<?php echo esc_attr( $row['full_name'] ); ?>">
+                                        <?php esc_html_e( 'Delete', 'docontact' ); ?>
+                                    </button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="8"><?php esc_html_e( 'No submissions found.', 'docontact' ); ?></td></tr>
+                        <tr><td colspan="9"><?php esc_html_e( 'No submissions found.', 'docontact' ); ?></td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>

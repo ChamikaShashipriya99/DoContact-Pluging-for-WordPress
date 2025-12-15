@@ -68,4 +68,27 @@ class DoContact_DB {
         global $wpdb;
         return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table}" );
     }
+
+    /**
+     * Delete a submission by ID.
+     *
+     * @param int $id Submission ID
+     * @return bool True on success, false on failure.
+     */
+    public function delete_submission( $id ) {
+        global $wpdb;
+
+        $id = absint( $id );
+        if ( $id <= 0 ) {
+            return false;
+        }
+
+        $deleted = $wpdb->delete(
+            $this->table,
+            array( 'id' => $id ),
+            array( '%d' )
+        );
+
+        return $deleted !== false;
+    }
 }
