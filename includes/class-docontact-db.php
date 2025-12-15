@@ -91,4 +91,41 @@ class DoContact_DB {
 
         return $deleted !== false;
     }
+
+    /**
+     * Delete multiple submissions by IDs.
+     *
+     * @param array $ids Array of submission IDs
+     * @return int|false Number of rows deleted on success, false on failure.
+     */
+    public function delete_submissions( $ids ) {
+        global $wpdb;
+
+        if ( ! is_array( $ids ) || empty( $ids ) ) {
+            return false;
+        }
+
+        // Sanitize all IDs
+        $ids = array_map( 'absint', $ids );
+        $ids = array_filter( $ids, function( $id ) {
+            return $id > 0;
+        } );
+
+        if ( empty( $ids ) ) {
+            return false;
+        }
+
+        // Create placeholders for prepared statement
+        $placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+        
+        // Prepare and execute query
+        $sql = $wpdb->prepare(
+            "DELETE FROM {$this->table} WHERE id IN ({$placeholders})",
+            $ids
+        );
+
+        $deleted = $wpdb->query( $sql );
+
+        return $deleted !== false ? (int) $deleted : false;
+    }
 }

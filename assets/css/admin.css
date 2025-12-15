@@ -38,3 +38,32 @@
     opacity: 0.6;
     cursor: not-allowed;
 }
+
+/* Bulk actions styling */
+.tablenav.top {
+    margin: 10px 0;
+}
+
+.tablenav .bulkactions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tablenav .bulkactions select {
+    margin-right: 5px;
+}
+
+.tablenav .bulkactions #doaction:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.check-column {
+    width: 2.2em;
+    text-align: center;
+}
+
+.check-column input[type="checkbox"] {
+    margin: 0;
+}

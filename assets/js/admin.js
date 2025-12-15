@@ -127,6 +127,135 @@
             });
         });
         
+        // Select All checkbox functionality
+        $('#cb-select-all').on('change', function(){
+            $('.docontact-checkbox').prop('checked', $(this).prop('checked'));
+            updateBulkActionButton();
+        });
+        
+        // Individual checkbox change
+        $(document).on('change', '.docontact-checkbox', function(){
+            var totalCheckboxes = $('.docontact-checkbox').length;
+            var checkedCheckboxes = $('.docontact-checkbox:checked').length;
+            $('#cb-select-all').prop('checked', totalCheckboxes === checkedCheckboxes);
+            updateBulkActionButton();
+        });
+        
+        // Update bulk action button state
+        function updateBulkActionButton(){
+            var checkedCount = $('.docontact-checkbox:checked').length;
+            $('#doaction').prop('disabled', checkedCount === 0);
+        }
+        
+        // Initialize button state
+        updateBulkActionButton();
+        
+        // Bulk action form submission
+        $('#doaction').on('click', function(e){
+            e.preventDefault();
+            
+            var action = $('#bulk-action-selector-top').val();
+            if (action === '-1' || action === '') {
+                alert('Please select a bulk action.');
+                return;
+            }
+            
+            var checkedBoxes = $('.docontact-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                alert('Please select at least one submission.');
+                return;
+            }
+            
+            if (action === 'delete') {
+                handleBulkDelete(checkedBoxes);
+            }
+        });
+        
+        // Handle bulk delete
+        function handleBulkDelete($checkedBoxes){
+            var ids = [];
+            var names = [];
+            
+            $checkedBoxes.each(function(){
+                var $row = $(this).closest('tr');
+                var id = $(this).val();
+                var name = $row.find('td:nth-child(3)').text().trim() || 'submission';
+                ids.push(id);
+                names.push(name);
+            });
+            
+            var count = ids.length;
+            var confirmMessage = DoContactAdmin.confirm || 'Are you sure you want to delete this submission?';
+            var bulkConfirm = 'Are you sure you want to delete ' + count + ' selected submission(s)?\n\nThis action cannot be undone.';
+            
+            if (!confirm(bulkConfirm)) {
+                return;
+            }
+            
+            // Disable button and show loading
+            $('#doaction').prop('disabled', true).val('Deleting...');
+            $checkedBoxes.prop('disabled', true);
+            
+            // Send AJAX request
+            $.ajax({
+                url: DoContactAdmin.ajax_url || ajaxurl,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'docontact_bulk_delete',
+                    submission_ids: ids,
+                    docontact_delete_nonce: DoContactAdmin.nonce
+                },
+                success: function(response){
+                    if (response && response.success) {
+                        // Remove all checked rows
+                        var $rows = $checkedBoxes.closest('tr');
+                        $rows.fadeOut(300, function(){
+                            $(this).remove();
+                            
+                            // Check if table is now empty
+                            var $tbody = $('.widefat tbody');
+                            if ($tbody.find('tr').length === 0) {
+                                $tbody.html('<tr><td colspan="10">No submissions found.</td></tr>');
+                            }
+                            
+                            // Reset select all checkbox
+                            $('#cb-select-all').prop('checked', false);
+                            updateBulkActionButton();
+                            
+                            // Show success message
+                            var message = response.data.message || count + ' submission(s) deleted successfully.';
+                            showAdminNotice(message, 'success');
+                        });
+                    } else {
+                        var errorMsg = (response && response.data && response.data.message) ? response.data.message : 'Failed to delete submissions.';
+                        showAdminNotice(errorMsg, 'error');
+                        $('#doaction').prop('disabled', false).val('Apply');
+                        $checkedBoxes.prop('disabled', false);
+                    }
+                },
+                error: function(xhr, status, error){
+                    console.error('AJAX Error:', status, error);
+                    console.error('Response:', xhr.responseText);
+                    
+                    var errorMsg = 'An error occurred while deleting submissions.';
+                    if (xhr.responseText) {
+                        try {
+                            var errorResponse = JSON.parse(xhr.responseText);
+                            if (errorResponse.data && errorResponse.data.message) {
+                                errorMsg = errorResponse.data.message;
+                            }
+                        } catch(e) {
+                            // Ignore JSON parse errors
+                        }
+                    }
+                    showAdminNotice(errorMsg, 'error');
+                    $('#doaction').prop('disabled', false).val('Apply');
+                    $checkedBoxes.prop('disabled', false);
+                }
+            });
+        }
+        
         // Helper function to show admin notices
         function showAdminNotice(message, type){
             type = type || 'info';

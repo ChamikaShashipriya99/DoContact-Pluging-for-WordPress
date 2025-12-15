@@ -114,9 +114,26 @@ class DoContact_Admin {
             <h1><?php esc_html_e( 'DoContact Submissions', 'docontact' ); ?></h1>
             <p><?php printf( esc_html__( 'Total submissions: %d', 'docontact' ), intval( $total ) ); ?></p>
 
+            <?php if ( ! empty( $submissions ) ): ?>
+            <div class="tablenav top">
+                <div class="alignleft actions bulkactions">
+                    <label for="bulk-action-selector-top" class="screen-reader-text"><?php esc_html_e( 'Select bulk action', 'docontact' ); ?></label>
+                    <select name="action" id="bulk-action-selector-top">
+                        <option value="-1"><?php esc_html_e( 'Bulk Actions', 'docontact' ); ?></option>
+                        <option value="delete"><?php esc_html_e( 'Delete', 'docontact' ); ?></option>
+                    </select>
+                    <input type="submit" id="doaction" class="button action" value="<?php esc_attr_e( 'Apply', 'docontact' ); ?>">
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <form id="docontact-bulk-form" method="post">
             <table class="widefat fixed striped">
                 <thead>
                     <tr>
+                        <td class="manage-column column-cb check-column">
+                            <input id="cb-select-all" type="checkbox">
+                        </td>
                         <th width="60"><?php esc_html_e( 'ID', 'docontact' ); ?></th>
                         <th><?php esc_html_e( 'Full Name', 'docontact' ); ?></th>
                         <th><?php esc_html_e( 'Email', 'docontact' ); ?></th>
@@ -132,6 +149,9 @@ class DoContact_Admin {
                     <?php if ( ! empty( $submissions ) ): ?>
                         <?php foreach ( $submissions as $row ): ?>
                             <tr>
+                                <th scope="row" class="check-column">
+                                    <input type="checkbox" name="submission_ids[]" value="<?php echo esc_attr( $row['id'] ); ?>" class="docontact-checkbox">
+                                </th>
                                 <td><?php echo esc_html( $row['id'] ); ?></td>
                                 <td><?php echo esc_html( $row['full_name'] ); ?></td>
                                 <td><a href="mailto:<?php echo esc_attr( $row['email'] ); ?>"><?php echo esc_html( $row['email'] ); ?></a></td>
@@ -168,10 +188,11 @@ class DoContact_Admin {
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
-                        <tr><td colspan="9"><?php esc_html_e( 'No submissions found.', 'docontact' ); ?></td></tr>
+                        <tr><td colspan="10"><?php esc_html_e( 'No submissions found.', 'docontact' ); ?></td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
+            </form>
 
             <?php if ( $total_pages > 1 ): ?>
                 <div class="tablenav">
