@@ -247,3 +247,5 @@ This plugin is provided as-is for use with WordPress.
 
 **Note:** This plugin follows WordPress coding standards and best practices for security, performance, and maintainability.
 
+---
+Made By Chamika Shashipriya Under DoAcadamy Module 2 Assignment 1 of Full-Stack Web Developer Industrial Training Program
