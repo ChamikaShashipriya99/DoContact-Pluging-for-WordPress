@@ -88,8 +88,8 @@ class DoContact_Shortcode {
         ob_start();
         ?>
         <div class="docontact-wrap">
+            <div id="docontact-messages" aria-live="polite"></div>
             <form id="docontact-form" method="post" novalidate>
-                <div id="docontact-messages" aria-live="polite"></div>
 
                 <p>
                     <label for="doc_full_name">Full Name <span class="required">*</span></label><br/>

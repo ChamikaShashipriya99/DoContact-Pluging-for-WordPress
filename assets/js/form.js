@@ -121,7 +121,7 @@
         $form.on('submit', function(e){
             e.preventDefault();
             var $messages = $('#docontact-messages');
-            $messages.html('');
+            $messages.html('').show();
 
             var full_name = $.trim($('#doc_full_name').val() || '');
             var email = $.trim($('#doc_email').val() || '');
@@ -162,7 +162,23 @@
                 $('#doc-loading').hide();
                 $('#doc_submit').prop('disabled', false);
                 if (res && res.success) {
-                    $messages.html('<div class="doc-success">' + res.data.message + '</div>');
+                    // Hide the form and show thank you message
+                    $form.slideUp(400, function(){
+                        var thankYouMessage = '<div class="doc-thank-you-message">' +
+                            '<div class="doc-thank-you-icon">✓</div>' +
+                            '<h3 class="doc-thank-you-title">Thank You!</h3>' +
+                            '<p class="doc-thank-you-text">' + res.data.message + '</p>' +
+                            '<p class="doc-thank-you-subtext">We will get back to you soon.</p>' +
+                            '<p class="doc-thank-you-redirect">Redirecting to home page in 3 seconds...</p>' +
+                            '</div>';
+                        $messages.html(thankYouMessage);
+                        $messages.show();
+                        
+                        // Redirect to home page after 3 seconds
+                        setTimeout(function(){
+                            window.location.href = DoContactVars.home_url;
+                        }, 3000);
+                    });
                     $form[0].reset();
                 } else {
                     var msg = 'Submission failed.';

@@ -108,6 +108,7 @@ class DoContact_Plugin_Bootstrap {
         wp_localize_script( 'docontact-form', 'DoContactVars', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'docontact_submit_nonce' ),
+            'home_url' => home_url( '/' ),
         ) );
     }
 
